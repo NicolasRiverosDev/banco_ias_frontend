@@ -1,0 +1,71 @@
+<header class="topbar">
+  <div>
+    <h1>BancoIAS · Core de preaprobados</h1>
+    <p class="muted">Uso de cupos preaprobados</p>
+  </div>
+  <label class="customer">
+    <span>Cliente</span>
+    <select [ngModel]="customerId()" (ngModelChange)="changeCustomer($event)">
+      @for (c of customers; track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+  </label>
+</header>
+
+<main class="layout">
+  @if (loadError(); as error) {
+    <div class="banner">{{ error }}</div>
+  }
+
+  <section class="card">
+    <h2>Cupos de {{ customerId() }}</h2>
+    <div class="quotas">
+      @for (p of preApproved(); track p.id) {
+        <div class="quota" [class.blocked]="p.status !== 'ACTIVE'">
+          <span class="quota-id">{{ p.id }}</span>
+          <span class="quota-amount">{{ p.availableAmount | cop }}</span>
+          <span class="pill" [class.ok]="p.status === 'ACTIVE'" [class.ko]="p.status !== 'ACTIVE'">{{ p.status }}</span>
+        </div>
+      } @empty {
+        <p class="muted">Sin preaprobados.</p>
+      }
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Nueva solicitud</h2>
+      <app-usage-form
+        [customerId]="customerId()"
+        [preApproved]="preApproved()"
+        [busy]="busy()"
+        (submitted)="submit($event)"
+      />
+    </section>
+
+    <section class="card">
+      <h2>Resultado</h2>
+      <app-result-card [outcome]="outcome()" />
+
+      <form class="lookup" (ngSubmit)="lookup(lookupReference)">
+        <input name="lookup" [(ngModel)]="lookupReference" placeholder="Consultar por referencia (p. ej. REF-001)" />
+        <button type="submit" class="secondary">Consultar</button>
+      </form>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Solicitudes recientes</h2>
+      <div class="inline">
+        <label class="check">
+          <input type="checkbox" [ngModel]="onlyCurrentCustomer()" (ngModelChange)="toggleOnlyCurrentCustomer($event)" />
+          Solo {{ customerId() }}
+        </label>
+        <button type="button" class="secondary" (click)="refresh()">Actualizar</button>
+      </div>
+    </div>
+    <app-recent-requests [requests]="recent()" (selected)="lookup($event)" />
+  </section>
+</main>

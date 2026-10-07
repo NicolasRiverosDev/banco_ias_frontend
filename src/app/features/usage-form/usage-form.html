@@ -1,0 +1,44 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="form" novalidate>
+  <label class="field">
+    <span>Referencia de la solicitud</span>
+    <div class="inline">
+      <input formControlName="requestReference" autocomplete="off" />
+      <button type="button" class="secondary" (click)="regenerateReference()" title="Generar una referencia nueva">
+        Nueva
+      </button>
+    </div>
+    @if (form.controls.requestReference.touched && form.controls.requestReference.invalid) {
+      <small class="field-error">Obligatoria; máximo 64 caracteres (letras, números, . _ -).</small>
+    }
+  </label>
+
+  <label class="field">
+    <span>Preaprobado</span>
+    <input formControlName="preApprovedId" list="pre-approved-options" autocomplete="off" />
+    <datalist id="pre-approved-options">
+      @for (item of preApproved(); track item.id) {
+        <option [value]="item.id">{{ item.status }}</option>
+      }
+    </datalist>
+  </label>
+
+  <label class="field">
+    <span>Cliente</span>
+    <input formControlName="customerId" autocomplete="off" />
+  </label>
+
+  <label class="field">
+    <span>Valor (COP)</span>
+    <input type="number" formControlName="amount" step="1" />
+    @if (form.controls.amount.touched && form.controls.amount.invalid) {
+      <small class="field-error">Ingrese un valor.</small>
+    }
+  </label>
+
+  <button type="submit" class="primary" [disabled]="busy()">
+    {{ busy() ? 'Procesando…' : 'Enviar solicitud' }}
+  </button>
+  <p class="hint">
+    Enviar dos veces la misma referencia no descuenta el cupo de nuevo: el sistema devuelve la solicitud original.
+  </p>
+</form>

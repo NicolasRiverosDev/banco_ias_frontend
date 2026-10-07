@@ -1,0 +1,36 @@
+@if (requests().length === 0) {
+  <p class="muted">No hay solicitudes procesadas.</p>
+} @else {
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Procesada</th>
+          <th>Referencia</th>
+          <th>Preaprobado</th>
+          <th>Cliente</th>
+          <th class="num">Valor</th>
+          <th>Resultado</th>
+          <th>Razón</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of requests(); track r.requestReference) {
+          <tr (click)="selected.emit(r.requestReference)" title="Ver detalle">
+            <td>{{ r.processedAt | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td><code>{{ r.requestReference }}</code></td>
+            <td>{{ r.preApprovedId }}</td>
+            <td>{{ r.customerId }}</td>
+            <td class="num">{{ r.amount | cop }}</td>
+            <td>
+              <span class="pill" [class.ok]="r.status === 'AUTHORIZED'" [class.ko]="r.status === 'REJECTED'">
+                {{ r.status === 'AUTHORIZED' ? 'Autorizada' : 'Rechazada' }}
+              </span>
+            </td>
+            <td class="muted">{{ r.reasonMessage ?? '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

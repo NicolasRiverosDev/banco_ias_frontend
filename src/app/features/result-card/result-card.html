@@ -1,0 +1,58 @@
+@let current = outcome();
+@if (!current) {
+  <p class="muted">Aún no hay resultados. Envíe o consulte una solicitud.</p>
+} @else {
+  @switch (current.kind) {
+    @case ('processed') {
+      @let r = current.request;
+      <div class="result" [class.ok]="r.status === 'AUTHORIZED'" [class.ko]="r.status === 'REJECTED'" data-testid="result">
+        <div class="result-head">
+          <strong class="status">{{ r.status === 'AUTHORIZED' ? 'AUTORIZADA' : 'RECHAZADA' }}</strong>
+          @if (r.replayed) {
+            <span class="badge">Referencia repetida: se devuelve la solicitud original</span>
+          }
+        </div>
+        @if (r.reasonMessage) {
+          <p class="reason">{{ r.reasonMessage }} <code>{{ r.reasonCode }}</code></p>
+        }
+        <dl>
+          <dt>Referencia</dt><dd>{{ r.requestReference }}</dd>
+          <dt>Preaprobado</dt><dd>{{ r.preApprovedId }}</dd>
+          <dt>Cliente</dt><dd>{{ r.customerId }}</dd>
+          <dt>Valor</dt><dd>{{ r.amount | cop }}</dd>
+          <dt>Procesada</dt><dd>{{ r.processedAt | date: 'yyyy-MM-dd HH:mm:ss' }}</dd>
+          <dt>HTTP</dt><dd>{{ current.httpStatus }}</dd>
+        </dl>
+      </div>
+    }
+    @case ('conflict') {
+      <div class="result warn" data-testid="result">
+        <div class="result-head"><strong class="status">CONFLICTO DE REFERENCIA</strong></div>
+        <p class="reason">{{ current.error.message }}</p>
+        @if (current.error.original; as o) {
+          <p>Solicitud original conservada:</p>
+          <dl>
+            <dt>Estado</dt><dd>{{ o.status }}</dd>
+            <dt>Preaprobado</dt><dd>{{ o.preApprovedId }}</dd>
+            <dt>Cliente</dt><dd>{{ o.customerId }}</dd>
+            <dt>Valor</dt><dd>{{ o.amount | cop }}</dd>
+            <dt>Procesada</dt><dd>{{ o.processedAt | date: 'yyyy-MM-dd HH:mm:ss' }}</dd>
+          </dl>
+        }
+      </div>
+    }
+    @case ('error') {
+      <div class="result ko" data-testid="result">
+        <div class="result-head"><strong class="status">ERROR</strong> <code>{{ current.error.code }}</code></div>
+        <p class="reason">{{ current.error.message }}</p>
+        @if (current.error.details?.length) {
+          <ul>
+            @for (d of current.error.details; track d) {
+              <li>{{ d }}</li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  }
+}

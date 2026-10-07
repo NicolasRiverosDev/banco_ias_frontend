@@ -1,0 +1,2 @@
+/* Los estilos son globales (src/styles.css) para compartirlos entre los componentes. */
+:host { display: block; }
